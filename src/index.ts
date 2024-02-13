@@ -9,6 +9,7 @@ const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
+console.log(PORT)
 app.get("*", (req: Request, res: Response) => {
   res.status(505).json({ message: "Bad Request" });
 });

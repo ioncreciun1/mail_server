@@ -1,6 +1,12 @@
 import { DataSource } from "typeorm"
+import * as dotenv from "dotenv";
 
-const { DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE, NODE_ENV } =
+dotenv.config();
+
+
+dotenv.config();
+
+const { DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE } =
   process.env;
 
 export const DatabaseConnection = new DataSource({
@@ -11,8 +17,8 @@ export const DatabaseConnection = new DataSource({
     password: DB_PASSWORD,
     database: DB_DATABASE,
 
-    synchronize: NODE_ENV === "dev" ? false : false,
-    logging: NODE_ENV === "dev" ? false : false,
+    synchronize:  false,
+    logging:  false,
     migrations: [__dirname + "/migration/*.ts"],
     subscribers: [],
 })
