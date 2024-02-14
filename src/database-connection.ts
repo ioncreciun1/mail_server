@@ -1,5 +1,7 @@
 import { DataSource } from "typeorm"
 import * as dotenv from "dotenv";
+import { Email } from "./entity/email.entity";
+import { User } from "./entity/user.entity";
 
 dotenv.config();
 
@@ -19,6 +21,7 @@ export const DatabaseConnection = new DataSource({
 
     synchronize:  false,
     logging:  false,
-    migrations: [__dirname + "/migration/*.ts"],
+    entities: [User, Email],
+    migrations: [__dirname + "/migrations/*.ts"],
     subscribers: [],
 })
