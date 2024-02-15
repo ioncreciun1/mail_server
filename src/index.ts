@@ -16,7 +16,6 @@ app.use(errorHandler);
 app.use("/auth", userRouter);
 app.use("/api", emailRouter);
 
-console.log(PORT)
 app.get("*", (req: Request, res: Response) => {
   res.status(505).json({ message: "Bad Request" });
 });

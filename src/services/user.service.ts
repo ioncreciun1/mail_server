@@ -9,7 +9,6 @@ export class UserService {
 
   static async signUp(signUpUser:SignUpUser):Promise<User> {
         
-    console.log(signUpUser)
     const userRepository = DatabaseConnection.getRepository(User);
     const existingUser = await userRepository.findOne({
       where: { email:signUpUser.email },
