@@ -1,4 +1,4 @@
-export class UserPayloard{
+export class UserPayload{
     name: string;
     email: string;
     role: string;

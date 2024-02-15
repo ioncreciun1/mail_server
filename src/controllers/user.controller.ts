@@ -1,24 +1,27 @@
 import { Request, Response } from "express";
 import { DatabaseConnection } from "../database-connection";
 import { User } from "../entity/user.entity";
-import { encrypt } from "../helpers/helpers";
-import * as cache from "memory-cache";
+import { encrypt } from "../helpers/encrypt";
+import { SignUpUser } from "../model/user.model";
 
 export class UserController {
 
   static async signup(req: Request, res: Response) {
-    const { name, email, password, role } = req.body;
-    const encryptedPassword = await encrypt.encryptPassword(password);
+    
+    const signUpUser = req.body as SignUpUser;
+
+    console.log(signUpUser)
+    console.log(signUpUser)
+    const encryptedPassword = await encrypt.encryptPassword(signUpUser.password);
     const user = new User();
-    user.name = name;
-    user.email = email;
+    user.name = signUpUser.name;
+    user.email = signUpUser.email;
     user.password = encryptedPassword;
-    user.role = role;
+    user.role = signUpUser.role;
 
     const userRepository = DatabaseConnection.getRepository(User);
     await userRepository.save(user);
 
-    // userRepository.create({ Name, email, password });
     const token = encrypt.generateToken({ id: user.id });
 
     return res
@@ -27,22 +30,12 @@ export class UserController {
   }
 
   static async getUsers(req: Request, res: Response) {
-    const data = cache.get("data");
-    if (data) {
-      console.log("serving from cache");
-      return res.status(200).json({
-        data,
-      });
-    } else {
-      console.log("serving from db");
       const userRepository = DatabaseConnection.getRepository(User);
       const users = await userRepository.find();
 
-      cache.put("data", users, 6000);
       return res.status(200).json({
         data: users,
       });
-    }
   }
 
   static async updateUser(req: Request, res: Response) {
@@ -66,6 +59,6 @@ export class UserController {
       where: { id },
     });
     await userRepository.remove(user);
-    res.status(200).json({ message: "ok" });
+    res.status(200).json({ message: "User Deleted", user });
   }
 }

@@ -3,6 +3,7 @@ import { authentification } from "../middleware/authentifcation.middleware";
 import { UserController } from "../controllers/user.controller";
 import { authorization } from "../middleware/authorization.middleware";
 import { AuthController } from "../controllers/auth.controller";
+import { validateLogInUserBody, validateSignUpUserBody } from "../middleware/userValidation.middleware";
 const Router = express.Router();
 
 Router.get(
@@ -19,8 +20,8 @@ Router.get(
   AuthController.getProfile
 );
 
-Router.post("/signup", UserController.signup);
-Router.post("/login", AuthController.login);
+Router.post("/signup", validateSignUpUserBody, UserController.signup);
+Router.post("/login", validateLogInUserBody, AuthController.login);
 
 Router.put(
   "/update/:id",
