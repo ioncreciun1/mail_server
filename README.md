@@ -29,14 +29,23 @@ After you can run the following commands to run it
 To run this project, you will need to add the following environment variables to your .env file
 
 `PORT`
+On what port the server is running (At the moment it is localhost with the defined port
 
 `DB_HOST`
+Hostname of the database
 
 `DB_PORT`
+Port of the database 
 
 `DB_USERNAME`
+Username to access the database
 
 `DB_PASSWORD`
+Password to access the database
 
 `DB_DATABASE`
+Database name
+
+`JWT_SECRET`
+JWT Secret key
 
