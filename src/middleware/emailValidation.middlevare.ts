@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import * as dotenv from "dotenv";
-import { LogInUser, SignUpUser } from "../model/user.model";
-dotenv.config();
+import { EmailAdd } from "../model/email.model";
+import { isValidEmailAddress } from "../helpers/common";
 
 export const validateAddEmailBody = (
   req: Request,
@@ -9,34 +8,39 @@ export const validateAddEmailBody = (
   next: NextFunction
 ) => {
 
-    const singUpUser = req.body as SignUpUser;
+    const email = req.body as EmailAdd;
 
-    if (!singUpUser.name)
+    if (!email.title)
     {
-        return res.status(401).json({ message: "name parameter is missing" });
+        return res.status(403).json({ message: "title parameter is missing" });
     }
+
+    if (!email.content)
+    {
+        return res.status(403).json({ message: "content parameter is missing" });
+    }
+
+    if (!email.sender)
+    {
+        return res.status(403).json({ message: "sender email parameter is missing" });
+    }
+
+    if(!isValidEmailAddress(email.sender))
+    {
+        return res.status(403).json({ message: "Invalid sender email format" });
+    }
+
+    if (!email.receiver)
+    {
+        return res.status(403).json({ message: "receiver email parameter is missing" });
+    }
+
+    if(!isValidEmailAddress(email.receiver))
+    {
+        return res.status(403).json({ message: "Invalid receiver email format" });
+    }
+
+  
     
     next();
 };
-
-
-export const validateLogInUserBody = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-  
-      const logInUser = req.body as LogInUser;
-  
-      if (!logInUser.email)
-      {
-          return res.status(401).json({ message: "email parameter is missing" });
-      }
-  
-      if (!logInUser.passsword)
-      {
-          return res.status(401).json({ message: "password parameter is missing" });
-      }
-
-      next();
-  };

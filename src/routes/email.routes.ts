@@ -2,6 +2,7 @@ import * as express from "express";
 import { authentification } from "../middleware/authentifcation.middleware";
 import { authorization } from "../middleware/authorization.middleware";
 import { EmailController } from "../controllers/email.controller";
+import { validateAddEmailBody } from "../middleware/emailValidation.middlevare";
 const Router = express.Router();
 
 Router.get(
@@ -36,6 +37,7 @@ Router.post(
   "/email",
   authentification,
   authorization(["user", "admin"]),
+  validateAddEmailBody,
   EmailController.addEmail
 );
 

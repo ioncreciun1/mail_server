@@ -1,64 +1,61 @@
 import { Request, Response } from "express";
-import { DatabaseConnection } from "../database-connection";
 import { User } from "../entity/user.entity";
 import { encrypt } from "../helpers/encrypt";
-import { SignUpUser } from "../model/user.model";
+import { SignUpUser, UpdateUser } from "../model/user.model";
+import { UserService } from "../services/user.service";
+import { ErrorHandling } from "../services/errorHandling.service";
 
 export class UserController {
 
   static async signup(req: Request, res: Response) {
-    
-    const signUpUser = req.body as SignUpUser;
-
-    console.log(signUpUser)
-    console.log(signUpUser)
-    const encryptedPassword = await encrypt.encryptPassword(signUpUser.password);
-    const user = new User();
-    user.name = signUpUser.name;
-    user.email = signUpUser.email;
-    user.password = encryptedPassword;
-    user.role = signUpUser.role;
-
-    const userRepository = DatabaseConnection.getRepository(User);
-    await userRepository.save(user);
-
-    const token = encrypt.generateToken({ id: user.id });
-
-    return res
-      .status(200)
-      .json({ message: "User created successfully", token, user });
+      try {
+        const signUpUser = req.body as SignUpUser;
+        let signedUser = await UserService.signUp(signUpUser)
+        const token = encrypt.generateToken({ id: signedUser.id });
+        return res
+          .status(200)
+          .json({ message: "User created successfully", token, signedUser });
+      } catch (error) {
+        ErrorHandling.handleHttpErrors(res,error)
+      }
   }
 
   static async getUsers(req: Request, res: Response) {
-      const userRepository = DatabaseConnection.getRepository(User);
-      const users = await userRepository.find();
-
-      return res.status(200).json({
-        data: users,
-      });
+      try {
+        let users:Array<User> = await UserService.getAllUsers();
+        return res.status(200).json({
+          data: users,
+        });
+      } catch (error) {
+        ErrorHandling.handleHttpErrors(res,error)
+      }
   }
 
   static async updateUser(req: Request, res: Response) {
-    const { id } = req.params;
-    const { name, email } = req.body;
-    const userRepository = DatabaseConnection.getRepository(User);
-    const user = await userRepository.findOne({
-      where: { id },
-    });
-    user.name = name;
-    user.email = email;
-    await userRepository.save(user);
-    res.status(200).json({ message: "udpdate", user });
+    try {
+      const { id } = req.params;
+      const { name, email } = req.body;
+
+      const updateUser:UpdateUser = {
+        id: id,
+        name: name,
+        email: email
+      }
+      let user:User = await UserService.updateUser(updateUser)
+      return res.status(200).json({ message: "User updated", user });
+    } catch (error) {
+      ErrorHandling.handleHttpErrors(res,error)
+    }
   }
 
 
   static async deleteUser(req: Request, res: Response) {
-    const { id } = req.params;
-    const userRepository = DatabaseConnection.getRepository(User);
-    const user = await userRepository.findOne({
-      where: { id },
-    });
-    await userRepository.remove(user);
-    res.status(200).json({ message: "User Deleted", user });
+    try {
+      const { id } = req.params;
+      let user:User = await UserService.deleteUser(id)
+      return res.status(200).json({ message: "User Deleted", user });
+    } catch (error) {
+      ErrorHandling.handleHttpErrors(res,error)
+    }
   }
 }

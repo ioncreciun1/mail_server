@@ -9,5 +9,17 @@ export interface SignUpUser
 export interface LogInUser
 {
     email:string,
-    passsword:string,
+    password:string,
+}
+
+export interface UpdateUser
+{
+    id:string,
+    name:string,
+    email:string
+}
+
+export interface currentUser
+{
+    id:string
 }

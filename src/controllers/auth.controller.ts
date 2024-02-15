@@ -2,22 +2,22 @@ import { Request, Response } from "express";
 import { DatabaseConnection } from "../database-connection";
 import { User } from "../entity/user.entity";
 import { encrypt } from "../helpers/encrypt";
+import { LogInUser } from "../model/user.model";
+import { UserService } from "../services/user.service";
 
 export class AuthController {
   static async login(req: Request, res: Response) {
     try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        return res
-          .status(500)
-          .json({ message: " email and password required" });
+      const loginUser = req.body as LogInUser;
+
+      let user:User = await UserService.getUserByEmail(loginUser.email)
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
-      const userRepository = DatabaseConnection.getRepository(User);
-      const user = await userRepository.findOne({ where: { email } });
-
-      const isPasswordValid = encrypt.comparePassword(user.password, password);
-      if (!user || !isPasswordValid) {
+      const isPasswordValid = encrypt.comparePassword(user.password, loginUser.password);
+      if (!isPasswordValid) {
         return res.status(404).json({ message: "User not found" });
       }
       const token = encrypt.generateToken({ id: user.id });
@@ -30,13 +30,10 @@ export class AuthController {
   }
 
   static async getProfile(req: Request, res: Response) {
-    if (!req[" currentUser"]) {
+    if (!req["currentUser"]) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const userRepository = DatabaseConnection.getRepository(User);
-    const user = await userRepository.findOne({
-      where: { id: req[" currentUser"].id },
-    });
+    let user:User = await UserService.getUserById(req["currentUser"].id)
     return res.status(200).json({ ...user, password: undefined });
   }
 }

@@ -1,80 +1,98 @@
 import { Request, Response } from "express";
-import { DatabaseConnection } from "../database-connection";
 import { Email } from "../entity/email.entity";
+import { EmailService } from "../services/email.service";
+import { EmailAdd, UpdateEmail } from "../model/email.model";
+import { ErrorHandling } from "../services/errorHandling.service";
+
 
 export class EmailController {
 
   static async getAllEmails(req: Request, res: Response) {
-    const emailRepository = DatabaseConnection.getRepository(Email);
-    const emails:Array<Email> = await emailRepository.find();
-    return res
-      .status(200)
-      .json({ data:emails });
+    try {
+      const emails:Array<Email> = await EmailService.getAllEmails()
+      return res
+        .status(200)
+        .json({ data:emails });
+    } catch (error) {
+        ErrorHandling.handleHttpErrors(res,error)
+    }
   }
 
 
   static async getReceivedEmails(req: Request, res: Response) {
-    const emailRepository = DatabaseConnection.getRepository(Email);
-    const emails:Array<Email> = await emailRepository.find();
-    return res
-      .status(200)
-      .json({ data:emails });
+    try {
+      let emails:Array<Email> = await EmailService.getReceivedEmails(req["currentUser"].id)
+      return res
+        .status(200)
+        .json({ data:emails });
+    } catch (error) {
+      ErrorHandling.handleHttpErrors(res,error)
+    }
   }
 
   static async getSentEmails(req: Request, res: Response) {
-    const emailRepository = DatabaseConnection.getRepository(Email);
-    const emails:Array<Email> = await emailRepository.find();
-    return res
-      .status(200)
-      .json({ data:emails });
+    try {
+      let emails:Array<Email> = await EmailService.getSentEmails(req["currentUser"].id)
+      return res
+        .status(200)
+        .json({ data:emails });
+    } catch (error) {
+      ErrorHandling.handleHttpErrors(res,error)
+    }
   }
 
   static async getEmail(req: Request, res: Response) {
-    const { id } = req.params;
-    const emailRepository = DatabaseConnection.getRepository(Email);
-    const email = await emailRepository.findOne({
-      where: { id },
-    });
-    res.status(200).json({ email });
+    try {
+      const { id } = req.params;
+      let email:Email = await EmailService.getEmail(id)
+      return res
+        .status(200)
+        .json({ data:email });
+    } catch (error) {
+      ErrorHandling.handleHttpErrors(res,error)
+    }
   }
 
 
   static async addEmail(req: Request, res: Response) {
-    const {title,content,sender,receiver} = req.body;
-    const emailRepository = DatabaseConnection.getRepository(Email);
-    const email = new Email();
-    email.title = title;
-    email.content = content;
-    email.sender = sender;
-    email.receiver = receiver;
-    await emailRepository.save(email)
-    return res
-      .status(200)
+    try {
+      const addEmail = req.body as EmailAdd;
+      let email:Email = await EmailService.addEmail(addEmail)
+      return res.status(200)
       .json({ message: "Email created successfully", email});
+    } catch (error) {
+      ErrorHandling.handleHttpErrors(res,error)
+    }
+
   }
 
 
   static async updateEmail(req: Request, res: Response) {
-    const { id } = req.params;
-    const { title, content } = req.body;
-    const emailRepository = DatabaseConnection.getRepository(Email);
-    const email = await emailRepository.findOne({
-      where: { id },
-    });
-    email.title = title;
-    email.content = content;
-    await emailRepository.save(email);
-    res.status(200).json({ message: "Updated email with the following information", email });
+    try {
+      const { id } = req.params;
+      const { title, content } = req.body;
+      const updatedEmail:UpdateEmail =
+      {
+        id: id,
+        title: title,
+        content: content
+      } 
+      let email:Email = await EmailService.updateEmail(updatedEmail)
+      return res.status(200)
+      .json({ message: "Updated email with the following information", email });
+    } catch (error) {
+      ErrorHandling.handleHttpErrors(res,error)
+    }
   }
 
 
   static async deleteEmail(req: Request, res: Response) {
-    const { id } = req.params;
-    const emailRepository = DatabaseConnection.getRepository(Email);
-    const email = await emailRepository.findOne({
-      where: { id },
-    });
-    await emailRepository.remove(email);
-    res.status(200).json({ message: "The following email was deleted", email });
+    try {
+      const { id } = req.params;
+      let email:Email = await EmailService.deleteEmail(id)
+      return res.status(200).json({ message: "The following email was deleted", email });
+    } catch (error) {
+      ErrorHandling.handleHttpErrors(res,error)
+    }
   }
 }
