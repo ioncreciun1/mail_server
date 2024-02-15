@@ -19,6 +19,7 @@ In order to install this first clone it, then go to the project file and run:
 After you can run the following commands to run it
 
 ```bash
+  npm run migration
   npm run build
   npm run start 
 ```
